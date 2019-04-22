@@ -56,7 +56,7 @@ class Graph {
   addNode(value) {
     if (value === undefined) throw new Error('No node value provided');
     
-    this.adjList[value] = [];
+    if (!this.contains(value)) this.adjList[value] = [];
     
     return this;
   }
