@@ -18,7 +18,7 @@ This graph implementation is undirected and can have unconnected nodes. The node
 
 
 *** Nightmare mode:
-Implement traversal methods for depth-first and breadth-first traversal. The methods take a starting node and a callback that gets invoked for each node. The callback should receive two arguments: the node value and the distance (number of edges that separate the node from the starting node). See example usage below.
+TODO: Implement traversal methods for depth-first and breadth-first traversal. The methods take a starting node and a callback that gets invoked for each node. The callback should receive two arguments: the node value and the distance (number of edges that separate the node from the starting node). See example usage below.
 graph.traverseDepthFirst(value1, callback)
 => undefined
 Starting at the node with the value passed in, traverse the graph and invoke the callback for each node in a depth-first fashion.
@@ -43,14 +43,12 @@ var traverseBF = [];
 graph.traverseBreadthFirst(1, function(val, distance) { traverseBF.push([val, distance]) });
 traverseBF should be [ [ 1, 0 ], [ 2, 1 ], [ 4, 1 ], [ 3, 2 ], [ 5, 3 ] ]
 *** Exercises:
-Given a directed graph and two nodes in the graph, write a function that indicates whether there is a route between the two nodes. Bonus: rather than returning a boolean, have your function return the shortest distance between the two nodes (the number of edges that separate them).
+TODO: Given a directed graph and two nodes in the graph, write a function that indicates whether there is a route between the two nodes. Bonus: rather than returning a boolean, have your function return the shortest distance between the two nodes (the number of edges that separate them).
 */
-
-// TODO: refactor to use JS object
 
 class Graph {
   constructor() {
-    this.adjList = new Map();
+    this.adjList = {};
   }
   
   // Add node to graph
@@ -58,17 +56,17 @@ class Graph {
   addNode(value) {
     if (value === undefined) throw new Error('No node value provided');
     
-    this.adjList.set(value, []);
+    this.adjList[value] = [];
     
     return this;
   }
   
   // Create connection between two nodes if they're both present in the graph
   addEdge(value1, value2) {
-    if (!this.contains(value1) || !this.contains(value2)) throw new Error('Invalid node value');
+    if (!this.contains(value1) || !this.contains(value2)) throw new Error('Invalid node values');
     
-    const value1Edges = this.adjList.get(value1);
-    const value2Edges = this.adjList.get(value2);
+    const value1Edges = this.adjList[value1];
+    const value2Edges = this.adjList[value2];
   
     value1Edges.push(value2);
     value2Edges.push(value1);
@@ -79,25 +77,25 @@ class Graph {
   // Remove node from graph
   // => undefined
   removeNode(value) {
-    const node = this.adjList.get(value);
+    const nodeEdges = this.adjList[value];
     
-    node.forEach(neighbor => {
-      const neighborEdgesArr = this.adjList.get(neighbor);
+    nodeEdges.forEach(neighbor => {
+      const neighborEdgesArr = this.adjList[neighbor];
       const edgeIndex = neighborEdgesArr.indexOf(value);
   
       neighborEdgesArr.splice(edgeIndex, 1);
     });
     
-    this.adjList.delete(value);
+    delete this.adjList[value];
   }
   
   // Remove connection between two nodes
   // => undefined
   removeEdge(value1, value2) {
-    if (!this.contains(value1) || !this.contains(value2)) throw new Error('Invalid node value');
+    if (!this.hasEdge(value1, value2)) throw new Error('Edge does not exist');
     
-    const value1Edges = this.adjList.get(value1);
-    const value2Edges = this.adjList.get(value2);
+    const value1Edges = this.adjList[value1];
+    const value2Edges = this.adjList[value2];
   
     value1Edges.splice(value1Edges.indexOf(value2), 1);
     value2Edges.splice(value2Edges.indexOf(value1), 1);
@@ -106,18 +104,21 @@ class Graph {
   // Returns true if value is found in graph, false otherwise
   // => true/false
   contains(value) {
-    return this.adjList.has(value);
+    return this.adjList.hasOwnProperty(value);
   }
 
   // Returns true if edge exists, false otherwise
   // => true/false
   hasEdge(value1, value2) {
-    if (!this.contains(value1) || !this.contains(value2)) throw new Error('Invalid node value');
+    if (!this.contains(value1) || !this.contains(value2)) throw new Error('Invalid node values');
     
-    const value1Edges = this.adjList.get(value1);
-    const value2Edges = this.adjList.get(value2);
+    const value1Edges = this.adjList[value1];
+    const value2Edges = this.adjList[value2];
     
-    return value1Edges.includes(value2) && value2Edges.includes(value1);
+    return (
+      value1Edges.includes(value2) &&
+      value2Edges.includes(value1)
+    );
   }
   
   // Traverse the graph and invoke the passed callback once for each node.
@@ -125,7 +126,9 @@ class Graph {
   // node value, node Neighbors, all nodes.
   // => undefined
   forEach(callback) {
-    this.adjList.forEach(callback);
+    for (let node in this.adjList) {
+      if (this.adjList.hasOwnProperty(node)) callback(node, this.adjList[node], this.adjList);
+    }
   }
 }
 
