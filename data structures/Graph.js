@@ -130,6 +130,51 @@ class Graph {
       if (this.adjList.hasOwnProperty(node)) callback(node, this.adjList[node], this.adjList);
     }
   }
+  
+  traverseDepthFirst(value, callback, visited = {}, distance = 0) {
+    if (!this.contains(value)) throw new Error('Invalid node value');
+    if (typeof callback !== 'function') throw new Error(`Expected typeof callback to be function, instead got ${typeof callback}`);
+    
+    callback(value, distance);
+    visited[value] = true;
+    
+    const nodeEdges = this.adjList[value];
+    
+    nodeEdges.forEach(neighbor => {
+      if (visited[neighbor]) return;
+      
+      this.traverseDepthFirst(neighbor, callback, visited, distance + 1);
+    });
+  }
+  
+  traverseBreadthFirst(value, callback) {
+    if (!this.contains(value)) throw new Error('Invalid node value');
+    if (typeof callback !== 'function') throw new Error(`Expected typeof callback to be function, instead got ${typeof callback}`);
+    
+    const visited = {};
+    const queue = [value];
+    
+    visited[value] = 0;
+    
+    while (queue.length) {
+      const node = queue.shift();
+      
+      // run callback on current node, pass distance as 2nd param
+      callback(node, visited[node]);
+      
+      // find all unvisited neighbors
+      const neighbors = this.adjList[node].filter(neighbor => {
+        // if neighbor is unvisited, save distance, pass the filter
+        if (!visited.hasOwnProperty(neighbor)) {
+          visited[neighbor] = visited[node] + 1;
+          return true;
+        }
+      });
+      
+      // add unvisited neighbors to the queue to go over them in next iteration
+      queue.push(...neighbors);
+    }
+  }
 }
 
 const graph = new Graph();
