@@ -22,7 +22,7 @@
 // TODO: refactor to use doubly-linked list
 
 class LRUCache {
-  constructor(maxCapacity) {
+  constructor(maxCapacity = 10) {
     this.capacity = maxCapacity;
     this.keysList = [];
     this.valuesHash = {};
